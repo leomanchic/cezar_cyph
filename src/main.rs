@@ -15,7 +15,7 @@ const LOGO: &str = r#"
 
 
 #[derive(Parser, Debug)]
-#[command(name="Caesar cipher", author="Leonid", version, about="Программа для шифрования методом Цезаря", long_about = None)]
+#[command(name="Caesar cipher", author="Gurman", version, about="Программа для шифрования методом Цезаря", long_about = None)]
 
 struct Args {
 
