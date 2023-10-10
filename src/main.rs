@@ -12,40 +12,63 @@ const LOGO: &str = r#"
                                                                                                                                                                                                                                                        
 "#;
 
-
-
 #[derive(Parser, Debug)]
 #[command(name="Caesar cipher", author="Gurman", version, about="Программа для шифрования методом Цезаря", long_about = None)]
 
 struct Args {
-
     /// Phrase to cipher
     #[arg(short, long)]
     messege: String,
-    
+
     /// Shift of cipher
     #[arg(short, long, default_value_t = 1)]
     shift: usize,
-    
-    
 }
 
-fn encrypt(messege: &str, shift: &usize) -> String{
+fn encrypt(messege: &str, shift: &usize) -> String {
+    let alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+    // let mut iteration = alphabet.as_bytes().to_vec();
+    // iteration.reverse();
+    // println!("{:?}",iteration);
+    let length = alphabet.len() as usize;
+    let mut dec = String::new();
+    for i in messege.chars() {
+        if i.is_whitespace() || i.is_numeric() {
+            dec.push(i);
+        } else {
+            let in_lower = if i.is_lowercase() { true } else { false };
+            let index = alphabet.find(i.to_lowercase().next().unwrap_or(i)).unwrap() / 2usize;
+            let new_index = ((index + shift) as usize) % (length / 2usize);
+            let new_symbol = alphabet.chars().nth(new_index);
+            match in_lower {
+                false => dec.push(new_symbol.unwrap().to_uppercase().next().unwrap()),
+                true => dec.push(new_symbol.unwrap()),
+            }
+        }
+    }
+    dec
+}
+fn decryption(messege: &str, shift: &usize) -> String {
     let alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
     let length = alphabet.len() as usize;
     let mut dec = String::new();
-    for i in messege.chars(){
-        if i.is_whitespace() || i.is_numeric(){
+    for i in messege.chars() {
+        if i.is_whitespace() || i.is_numeric() {
             dec.push(i);
-        }else{
-        let in_lower = if i.is_lowercase(){true}else{false};
-        let index = alphabet.find(i.to_lowercase().next().unwrap_or(i)).unwrap() / 2usize;
-        let new_index = ((index+shift) as usize) % (length / 2usize);
-        let new_symbol = alphabet.chars().nth(new_index);
-        match in_lower{
-            false  => {dec.push(new_symbol.unwrap().to_uppercase().next().unwrap())},
-            true =>  dec.push(new_symbol.unwrap()),
-        }        
+        } else {
+            let in_lower = if i.is_lowercase() { true } else { false };
+            let index = alphabet.find(i.to_lowercase().next().unwrap_or(i)).unwrap() / 2usize;
+            let new_index = if (index as i32 - *shift as i32) < 0 {
+                (index as i32 - *shift as i32) * -1i32
+            } else {
+                index as i32 - *shift as i32
+            };
+            let new_index = new_index as usize % (length / 2usize);
+            let new_symbol = alphabet.chars().nth(new_index);
+            match in_lower {
+                false => dec.push(new_symbol.unwrap().to_uppercase().next().unwrap()),
+                true => dec.push(new_symbol.unwrap()),
+            }
         }
     }
     dec
@@ -54,6 +77,14 @@ fn encrypt(messege: &str, shift: &usize) -> String{
 fn main() {
     bunt::println!("{$#04F6E6}{}{/$}", LOGO);
     let args = Args::parse();
-    bunt::println!("{$bold+green}Result:{/$} before encryption <{[red]}>",&args.messege);
-    bunt::println!("{$bold+green}Result:{/$} after encryption <{[blue]}>",encrypt(&args.messege, &args.shift));
+    bunt::println!(
+        "{$bold+green}Result:{/$} before encryption <{[red]}>",
+        &args.messege
+    );
+    let mut enc = encrypt(&args.messege, &args.shift);
+    bunt::println!("{$bold+green}Result:{/$} after encryption <{[blue]}>", enc);
+    bunt::println!(
+        "{$bold+green}Result:{/$} after encryption <{[blue]}>",
+        decryption(&enc, &args.shift)
+    );
 }
